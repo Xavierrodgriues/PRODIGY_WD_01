@@ -1,6 +1,8 @@
+import axios from 'axios'
 import React from 'react'
 import { useForm } from "react-hook-form"
 import { Link } from 'react-router-dom'
+import toast from 'react-hot-toast'
 
 const Login = () => {
   const {
@@ -9,14 +11,38 @@ const Login = () => {
     formState: { errors },
   } = useForm()
 
-  const onSubmit = (data) => console.log(data)
+  const onSubmit = async (data) =>{
+    const userInfo = {
+      email:data.email,
+      password:data.password
+    }
+   await axios.post('http://localhost:4001/user/login',userInfo)
+    .then((res)=>{
+      console.log(res.data)
+      if(res.data){
+        toast.success("Login Successfull 😎")
+        document.getElementById("my_modal_3").close()
+        setTimeout(()=>{
+          window.location.reload();
+          localStorage.setItem("USers",JSON.stringify(res.data.user)) // to store user data only im the local storage
+        },1000)
+      }
+    }).catch((err)=>{
+      if(err.response){
+        console.log(err);
+        toast.error("Login Failed 💀")
+        setTimeout(()=>{}, 3000);
+      }
+    })
+  }
 
   return (
     <div>
       <dialog id="my_modal_3" className="modal">
         <div className="modal-box">
           <form onSubmit={handleSubmit(onSubmit)} method="dialog">
-            <Link to='/' className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</Link>
+            <Link to='/' className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onClick={()=>
+            document.getElementById("my_modal_3").close()}>✕</Link>
             <h3 className="font-bold text-lg">Login</h3>
             <div className='mt-4 space-y-2'>
               <span>Email</span>
